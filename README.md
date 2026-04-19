@@ -5,6 +5,8 @@ language:
 library_name: transformers
 pipeline_tag: text-generation
 base_model: Qwen/Qwen3.6-35B-A3B
+datasets:
+- lordx64/reasoning-distill-opus-4-7-max-sft
 tags:
 - text-generation
 - reasoning
@@ -67,7 +69,9 @@ vllm serve lordx64/Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled \
 | | |
 |---|---|
 | Base model | `Qwen/Qwen3.6-35B-A3B` (loaded via `unsloth/Qwen3.6-35B-A3B` for faster finetuning) |
-| Teacher | Claude Opus 4.7 (Anthropic) — reasoning traces collected into `lordx64/reasoning-distill-opus-4-7-max-sft` |
+| Teacher | Claude Opus 4.7 (Anthropic) |
+| Training dataset | [`lordx64/reasoning-distill-opus-4-7-max-sft`](https://huggingface.co/datasets/lordx64/reasoning-distill-opus-4-7-max-sft) — reasoning traces from Claude Opus 4.7 reformatted into SFT conversations |
+| Source dataset | [`lordx64/reasoning-distill-claude-opus-4-7-max`](https://huggingface.co/datasets/lordx64/reasoning-distill-claude-opus-4-7-max) — raw teacher traces (pre-SFT formatting) |
 | Dataset size | ~7,800 full conversations, assistant side trained including `<think>…</think>` |
 | Method | SFT with Unsloth + TRL `SFTTrainer` + `train_on_responses_only` (loss only on assistant tokens) |
 | LoRA config | `r=16, alpha=16, dropout=0.0, targets=["q_proj","k_proj","v_proj","o_proj"]` (attention-only) |

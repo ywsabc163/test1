@@ -87,18 +87,33 @@ The initial plan was full LoRA including the MoE expert FFNs (`gate_proj/up_proj
 
 ## Evaluation
 
-Evaluated via `lm-evaluation-harness` (v0.4.9) with vLLM backend. Full methodology and the infra used is in the [project's evaluation pipeline](https://huggingface.co/datasets/lordx64/qwen3-6-distill-evals) — note that naive lm-eval runs against reasoning models with chat templates mis-extract answers (regex matches letters/numbers from inside `<think>` blocks before the final answer). The eval.py used here strips `<think>…</think>` from generations before the filter pipeline, uses per-task conventional fewshot counts, and runs at 64k context so thinking always closes.
+Evaluated via `lm-evaluation-harness` (v0.4.9) with vLLM backend at 64k context, bf16. Custom eval path strips `<think>…</think>` from generations before the filter pipeline, uses per-task conventional fewshot counts, and runs with `fewshot_as_multiturn=True` so few-shot examples are proper chat turns rather than concatenated prompt text. Raw results JSON is public: [lordx64/qwen3-6-distill-evals](https://huggingface.co/datasets/lordx64/qwen3-6-distill-evals).
 
 | Benchmark | Setup | Score |
 |---|---|---|
-| AIME 2025 | 0-shot, full (30) | _pending_ |
-| AIME 2024 | 0-shot, full (30) | _pending_ |
-| MATH-500 | 0-shot, limit 100 | _pending_ |
-| GPQA Diamond | 0-shot CoT, full (198) | _pending_ |
-| GSM8K CoT | 8-shot multiturn, limit 300 | _pending_ |
-| MMLU-Pro | 5-shot multiturn, limit 500 | _pending_ |
+| **GSM8K CoT** | 8-shot multiturn, limit 300 | **84.3%** (flexible-extract) / 76.7% (strict-match) |
+| **MMLU-Pro** | 5-shot multiturn, limit 500 | **74.9%** |
+| AIME 2024 | 0-shot, full (30) | _extraction fix in progress — model generates answers but not in a format the AIME extractor recognizes (`\boxed{}` vs plain prose)_ |
+| AIME 2025 | 0-shot, full (30) | _same — pending_ |
+| GPQA Diamond | 0-shot CoT, full (198) | _same — pending_ |
+| MATH-500 | 0-shot, limit 100 | _rerun pending (missing `sympy` / `math_verify` dep in the first run)_ |
 
-Numbers will be populated once the current eval job (`69e4f227ac288e522d8f0053`) completes.
+### MMLU-Pro subject breakdown
+
+Standard reasoning-model profile: strong on STEM, weaker on law/engineering. All subjects evaluated at limit 500, 5-shot multiturn.
+
+| Subject | Acc | Subject | Acc |
+|---|---:|---|---:|
+| Biology | 86.0% | Chemistry | 78.8% |
+| Psychology | 83.4% | Health | 73.8% |
+| Math | 83.6% | Business | 74.4% |
+| Economics | 83.0% | Other | 72.6% |
+| Physics | 81.0% | Philosophy | 71.3% |
+| Computer Science | 79.0% | History | 70.9% |
+|  |  | **Engineering** | **54.8%** |
+|  |  | **Law** | **55.6%** |
+
+Full per-task JSON with stderr, filter configs, and timings lives in the [evals dataset](https://huggingface.co/datasets/lordx64/qwen3-6-distill-evals/tree/main/reasoning/lordx64__Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled). The remaining tasks will be added to this table after a diagnostic rerun identifies why AIME/GPQA extraction is returning no-match on generated outputs.
 
 ## Limitations
 

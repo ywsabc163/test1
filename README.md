@@ -64,6 +64,14 @@ vllm serve lordx64/Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled \
   --dtype bfloat16 --max-model-len 65536 --gpu-memory-utilization 0.9
 ```
 
+### GGUF (LM Studio / llama.cpp)
+
+Quantized GGUF weights are available for `llama.cpp` and LM Studio:
+
+- [**IQ4_XS** (18.9 GB)](https://huggingface.co/lordx64/Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled-IQ4_XS-GGUF) — fits in ~24 GB RAM/VRAM, default pick for LM Studio
+
+Search `lordx64/Qwen3.6-35B-A3B-Claude-4.7-Opus-Reasoning-Distilled` inside LM Studio's model browser once HF has indexed the GGUF repo (usually within an hour of publication). More quant levels (`Q4_K_M`, `Q5_K_M`, `Q8_0`) can be added on request.
+
 ## Training
 
 | | |
